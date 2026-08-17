@@ -7,10 +7,25 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from compstat_archive.automation import publish_releases
+from compstat_archive.automation import _run, publish_releases
 
 
 class AutomationTests(unittest.TestCase):
+    def test_run_retries_transient_github_error(self) -> None:
+        failure = subprocess.CompletedProcess(
+            ["gh", "release"], 1, "", "HTTP 503: temporarily unavailable"
+        )
+        success = subprocess.CompletedProcess(["gh", "release"], 0, "ok", "")
+        with (
+            patch("compstat_archive.automation.subprocess.run", side_effect=[failure, success])
+            as run,
+            patch("compstat_archive.automation.time.sleep") as sleep,
+        ):
+            result = _run(["gh", "release"])
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(run.call_count, 2)
+        sleep.assert_called_once_with(1)
+
     def test_release_uses_default_branch_target(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

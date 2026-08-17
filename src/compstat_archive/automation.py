@@ -3,12 +3,24 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import time
 from pathlib import Path
 from typing import Any
 
 
 def _run(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(args, check=False, text=True, capture_output=True)
+    result: subprocess.CompletedProcess[str] | None = None
+    for attempt in range(4):
+        result = subprocess.run(args, check=False, text=True, capture_output=True)
+        detail = f"{result.stderr}\n{result.stdout}"
+        transient = any(
+            marker in detail
+            for marker in ("HTTP 500", "HTTP 502", "HTTP 503", "HTTP 504")
+        )
+        if result.returncode == 0 or not transient or attempt == 3:
+            break
+        time.sleep(2**attempt)
+    assert result is not None
     if check and result.returncode != 0:
         detail = result.stderr.strip() or result.stdout.strip() or "no command output"
         raise RuntimeError(f"{' '.join(args[:2])} failed: {detail}")
