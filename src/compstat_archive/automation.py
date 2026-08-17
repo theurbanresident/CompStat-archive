@@ -8,7 +8,11 @@ from typing import Any
 
 
 def _run(args: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(args, check=check, text=True, capture_output=True)
+    result = subprocess.run(args, check=False, text=True, capture_output=True)
+    if check and result.returncode != 0:
+        detail = result.stderr.strip() or result.stdout.strip() or "no command output"
+        raise RuntimeError(f"{' '.join(args[:2])} failed: {detail}")
+    return result
 
 
 def publish_releases(root: Path) -> int:
@@ -35,8 +39,6 @@ def publish_releases(root: Path) -> int:
             release["title"],
             "--notes-file",
             str(root / release["notes"]),
-            "--target",
-            "HEAD",
         ]
         _run(command)
         _run(["gh", "release", "edit", tag, "--draft=false"])
