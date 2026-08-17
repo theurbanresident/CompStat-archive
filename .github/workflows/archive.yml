@@ -116,8 +116,28 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment1.outputs.page_url || steps.deployment2.outputs.page_url || steps.deployment3.outputs.page_url }}
     steps:
       - name: Deploy research site
-        id: deployment
+        id: deployment1
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait before retrying Pages deployment
+        if: steps.deployment1.outcome == 'failure'
+        run: sleep 30
+
+      - name: Retry research site deployment
+        if: steps.deployment1.outcome == 'failure'
+        id: deployment2
+        continue-on-error: true
+        uses: actions/deploy-pages@v4
+
+      - name: Wait before final Pages deployment attempt
+        if: steps.deployment2.outcome == 'failure'
+        run: sleep 60
+
+      - name: Final research site deployment attempt
+        if: steps.deployment2.outcome == 'failure'
+        id: deployment3
         uses: actions/deploy-pages@v4
