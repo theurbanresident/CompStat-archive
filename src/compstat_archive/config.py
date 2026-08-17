@@ -15,7 +15,7 @@ BASE_URL = "https://www.wilmingtonde.gov"
 EXTRACTION_VERSION = "wilmington-compstat-v1"
 USER_AGENT = (
     "WilmingtonCompStatArchive/0.1 "
-    "(+https://github.com/theurbanresident/wilmington-compstat-archive; research archive)"
+    "(+https://github.com/theurbanresident/CompStat-archive; research archive)"
 )
 
 OFFENSES = {

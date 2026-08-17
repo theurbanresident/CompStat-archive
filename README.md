@@ -82,7 +82,12 @@ Failures create or update a GitHub issue with diagnostics. A monthly heartbeat
 records successful monitoring so GitHub does not disable the scheduled
 workflow for repository inactivity.
 
-Before enabling automation:
+While the repository is private, collection, validation, Git commits, private
+release assets, and issue reporting continue normally. Pages configuration,
+artifact upload, and deployment are skipped automatically. After the repository
+becomes public, the next workflow run enables the Pages portion of the pipeline.
+
+Before enabling public Pages:
 
 1. Enable GitHub Pages with **GitHub Actions** as the source.
 2. Enable immutable releases in repository settings.
