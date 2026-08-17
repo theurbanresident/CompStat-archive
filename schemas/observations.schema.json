@@ -7,7 +7,8 @@
     "report_id", "report_type", "report_start", "report_end",
     "report_revision", "source_sha256", "source_page", "geography_type",
     "geography_code", "offense_code", "period", "statistic",
-    "value_reported", "extraction_version", "validation_status"
+    "value_unit", "value_reported", "calculation_status", "quality_flag",
+    "extraction_version", "validation_status"
   ],
   "properties": {
     "report_id": {"type": "string"},
@@ -22,14 +23,39 @@
     "offense_code": {"type": "string"},
     "period": {"enum": ["last_7_days", "last_28_days", "year_to_date"]},
     "statistic": {"enum": ["count", "percent_change"]},
+    "value_unit": {"enum": ["count", "percent"]},
     "observation_year": {"type": ["integer", "null"]},
     "comparison_year": {"type": ["integer", "null"]},
     "comparison_lag_years": {"type": ["integer", "null"]},
     "value_numeric": {"type": ["number", "null"]},
+    "value_ratio": {"type": ["number", "null"]},
     "value_reported": {"type": "string"},
+    "calculated_value_numeric": {"type": ["number", "null"]},
+    "calculation_status": {
+      "enum": [
+        "not_applicable", "not_checkable", "matched",
+        "undefined_zero_denominator", "source_mismatch"
+      ]
+    },
+    "quality_flag": {"enum": ["", "source_arithmetic_mismatch"]},
     "null_reason": {"type": ["string", "null"]},
     "extraction_version": {"type": "string"},
-    "validation_status": {"enum": ["validated", "failed"]}
-  }
+    "validation_status": {"enum": ["validated", "source_warning", "failed"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"statistic": {"const": "count"}}},
+      "then": {
+        "properties": {
+          "value_unit": {"const": "count"},
+          "value_ratio": {"type": "null"},
+          "calculation_status": {"const": "not_applicable"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"statistic": {"const": "percent_change"}}},
+      "then": {"properties": {"value_unit": {"const": "percent"}}}
+    }
+  ]
 }
-

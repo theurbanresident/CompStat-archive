@@ -12,7 +12,7 @@ YEAR_END_PAGE = (
     "wilmington-police-department/wpd-year-end-report"
 )
 BASE_URL = "https://www.wilmingtonde.gov"
-EXTRACTION_VERSION = "wilmington-compstat-v1"
+EXTRACTION_VERSION = "wilmington-compstat-v2"
 USER_AGENT = (
     "WilmingtonCompStatArchive/0.1 "
     "(+https://github.com/theurbanresident/CompStat-archive; research archive)"
@@ -74,13 +74,38 @@ OBSERVATION_FIELDS = [
     "offense_label",
     "period",
     "statistic",
+    "value_unit",
     "observation_year",
     "comparison_year",
     "comparison_lag_years",
     "value_numeric",
+    "value_ratio",
     "value_reported",
+    "calculated_value_numeric",
+    "calculation_status",
+    "quality_flag",
     "null_reason",
     "extraction_version",
+    "validation_status",
+]
+
+COUNT_TALLY_FIELDS = [
+    "report_id",
+    "report_type",
+    "report_end",
+    "report_revision",
+    "tally_year",
+    "snapshot_status",
+    "source_sha256",
+    "source_page",
+    "geography_type",
+    "geography_code",
+    "geography_label",
+    "offense_code",
+    "offense_label",
+    "last_7_days_count",
+    "last_28_days_count",
+    "year_to_date_count",
     "validation_status",
 ]
 

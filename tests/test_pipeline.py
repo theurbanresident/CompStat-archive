@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import hashlib
 import json
 import tempfile
@@ -31,8 +32,23 @@ class PipelineTests(unittest.TestCase):
             catalog = json.loads((built / "catalog" / "reports.json").read_text())
             self.assertIsInstance(catalog, list)
             self.assertTrue((built / "schemas" / "observations.schema.json").exists())
+            self.assertTrue((built / "schemas" / "count-tallies.schema.json").exists())
             self.assertTrue((built / "bulk" / "weekly-observations.csv.gz").exists())
             self.assertTrue((built / "bulk" / "compstat.sqlite").exists())
+            tally_path = built / "data" / "compiled" / "count-tallies.csv"
+            self.assertTrue(tally_path.exists())
+            with tally_path.open(newline="", encoding="utf-8") as stream:
+                rows = list(csv.DictReader(stream))
+            self.assertTrue(rows)
+            self.assertTrue(
+                all("percent" not in field for field in rows[0])
+            )
+            self.assertTrue(
+                all(
+                    row["snapshot_status"] in {"weekly_running", "year_end_final"}
+                    for row in rows
+                )
+            )
             for report in catalog:
                 source = root / report["source_path"]
                 self.assertTrue(source.exists(), report["source_path"])

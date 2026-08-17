@@ -5,6 +5,7 @@ are recorded separately so researchers can identify the exact evidence used.
 
 ## 2026-08-17
 
+- Migrated 2 extracted report(s) to `wilmington-compstat-v2`; rebuilt 4732 observations and 338 counts-only tally rows.
 - Added `wpd-year-end-report-2020-r1`; SHA-256 `24eb3eb47e8763d7ef8fc43260490b639e865d86710f80286dd1312a5a595f5b`; validation `archived_source_only`.
 - Added `wpd-year-end-report-2021-r1`; SHA-256 `3880f2ed02ab648f435ce3ac9eda1b96e98f40388e93128e883a93d395598e10`; validation `archived_source_only`.
 - Added `wpd-year-end-report-2022-r1`; SHA-256 `8c4db550dccd21b7b43f0f42dbc8267a5f71eb592a72f91c2f3a525857847d13`; validation `archived_source_only`.

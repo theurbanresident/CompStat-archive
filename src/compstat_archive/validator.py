@@ -26,6 +26,14 @@ def validate_parsed_report(parsed: ParsedReport) -> ValidationResult:
     errors: list[str] = []
     warnings: list[str] = []
     checks: dict[str, Any] = {}
+    for row in parsed.observations:
+        row["validation_status"] = "validated"
+        row.setdefault("calculated_value_numeric", None)
+        row.setdefault(
+            "calculation_status",
+            "not_checkable" if row["statistic"] == "percent_change" else "not_applicable",
+        )
+        row.setdefault("quality_flag", "")
     geographies = {row["geography_code"] for row in parsed.source_rows}
 
     expectations = {
@@ -105,26 +113,32 @@ def validate_parsed_report(parsed: ParsedReport) -> ValidationResult:
             row["geography_code"],
             row["offense_code"],
             row["period"],
-            parsed.reference_year,
+            row["observation_year"],
         )
         prior_key = (
             row["geography_code"],
             row["offense_code"],
             row["period"],
-            parsed.reference_year - 1,
+            row["comparison_year"],
         )
         if current_key not in counts or prior_key not in counts:
+            row["calculation_status"] = "not_checkable"
             continue
         current, prior = counts[current_key], counts[prior_key]
         percent_checks += 1
         if prior == 0:
+            row["calculation_status"] = "undefined_zero_denominator"
             if row["value_reported"] not in {"*", "0%"}:
                 warnings.append(
                     f"{row['geography_code']} {row['offense_code']} {row['period']}: "
                     f"prior is zero but source prints {row['value_reported']}"
                 )
+                row["calculation_status"] = "source_mismatch"
+                row["quality_flag"] = "source_arithmetic_mismatch"
+                row["validation_status"] = "source_warning"
             continue
         calculated = ((current - prior) / prior) * 100
+        row["calculated_value_numeric"] = round(calculated, 6)
         reported = row["value_numeric"]
         if reported is None or abs(float(reported) - calculated) > 1.0:
             warnings.append(
@@ -132,10 +146,21 @@ def validate_parsed_report(parsed: ParsedReport) -> ValidationResult:
                 f"source percent reported {row['value_reported']}, "
                 f"calculated {calculated:.2f}%"
             )
+            row["calculation_status"] = "source_mismatch"
+            row["quality_flag"] = "source_arithmetic_mismatch"
+            row["validation_status"] = "source_warning"
+        else:
+            row["calculation_status"] = "matched"
     checks["one_year_percent_checks"] = percent_checks
 
     return ValidationResult(
-        status="validated" if not errors else "failed",
+        status=(
+            "failed"
+            if errors
+            else "validated_with_warnings"
+            if warnings
+            else "validated"
+        ),
         errors=errors,
         warnings=warnings,
         checks=checks,

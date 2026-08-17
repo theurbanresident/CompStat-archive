@@ -16,7 +16,12 @@ from typing import Any, Iterable
 from pypdf import PdfReader
 
 from .collector import CityClient, document_url_parts
-from .config import EXTRACTION_VERSION, OBSERVATION_FIELDS, REPORT_FIELDS
+from .config import (
+    COUNT_TALLY_FIELDS,
+    EXTRACTION_VERSION,
+    OBSERVATION_FIELDS,
+    REPORT_FIELDS,
+)
 from .models import SourceCandidate, ValidationResult
 from .parser import parse_compstat_pdf
 from .validator import validate_parsed_report
@@ -30,10 +35,38 @@ def _json_dump(path: Path, value: Any) -> None:
 def _write_csv(path: Path, rows: Iterable[dict[str, Any]], fields: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(
+            stream,
+            fieldnames=fields,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
         for row in rows:
             writer.writerow({field: row.get(field) for field in fields})
+
+
+def _decorate_observations(
+    parsed: Any,
+    *,
+    report_id: str,
+    report_type: str,
+    revision: int,
+    source_sha256: str,
+) -> None:
+    for observation in parsed.observations:
+        observation.update(
+            {
+                "report_id": report_id,
+                "report_type": report_type,
+                "report_start": parsed.report_start.isoformat(),
+                "report_end": parsed.report_end.isoformat(),
+                "report_revision": revision,
+                "source_sha256": source_sha256,
+            }
+        )
+        if observation.get("validation_status") == "pending":
+            observation["validation_status"] = "validated"
 
 
 def _slug(value: str) -> str:
@@ -278,22 +311,20 @@ def process_candidate(
         "release_url": _release_url(release_tag, release_asset),
     }
 
-    if parsed is not None and validation.status == "validated":
+    if parsed is not None and validation.status in {
+        "validated",
+        "validated_with_warnings",
+    }:
         relative_data_path = _data_path(candidate, revision)
         data_path = str(relative_data_path).replace("\\", "/")
         manifest["data_path"] = data_path
-        for observation in parsed.observations:
-            observation.update(
-                {
-                    "report_id": report_id,
-                    "report_type": candidate.report_type,
-                    "report_start": parsed.report_start.isoformat(),
-                    "report_end": parsed.report_end.isoformat(),
-                    "report_revision": revision,
-                    "source_sha256": sha256,
-                    "validation_status": "validated",
-                }
-            )
+        _decorate_observations(
+            parsed,
+            report_id=report_id,
+            report_type=candidate.report_type,
+            revision=revision,
+            source_sha256=sha256,
+        )
         _write_csv(root / relative_data_path, parsed.observations, OBSERVATION_FIELDS)
 
     manifest_path = _manifest_path(candidate, revision)
@@ -367,6 +398,14 @@ def rebuild_changelog(root: Path) -> None:
         for event_date, date_events in by_date.items():
             lines.extend([f"## {event_date}", ""])
             for event in date_events:
+                if event["event_type"] == "data_schema_migration":
+                    lines.append(
+                        f"- Migrated {event['report_count']} extracted report(s) to "
+                        f"`{event['extraction_version']}`; rebuilt "
+                        f"{event['observation_count']} observations and "
+                        f"{event['count_tally_rows']} counts-only tally rows."
+                    )
+                    continue
                 verb = "Added" if event["event_type"] == "report_added" else "Revised"
                 detail = (
                     f"{verb} `{event['report_id']}`; SHA-256 "
@@ -413,6 +452,91 @@ def rebuild_coverage(root: Path, reports: list[dict[str, Any]]) -> None:
     )
 
 
+def rebuild_compiled_counts(
+    root: Path, reports: list[dict[str, Any]] | None = None
+) -> int:
+    """Build one current-year, counts-only row per report/geography/offense."""
+    reports = reports if reports is not None else load_reports(root)
+    latest_by_key: dict[str, dict[str, Any]] = {}
+    for report in reports:
+        if report.get("report_type") not in {"weekly_compstat", "year_end_compstat"}:
+            continue
+        if not report.get("data_path"):
+            continue
+        key = str(report["report_key"])
+        current = latest_by_key.get(key)
+        if current is None or int(report["revision"]) > int(current["revision"]):
+            latest_by_key[key] = report
+
+    tally_rows: list[dict[str, Any]] = []
+    for report in sorted(
+        latest_by_key.values(),
+        key=lambda row: (row["report_end"], row["report_type"], int(row["revision"])),
+    ):
+        report_end = date.fromisoformat(report["report_end"])
+        groups: dict[tuple[str, str], dict[str, Any]] = {}
+        data_path = root / report["data_path"]
+        with data_path.open(newline="", encoding="utf-8") as stream:
+            for row in csv.DictReader(stream):
+                if row.get("statistic") != "count":
+                    continue
+                if int(row["observation_year"]) != report_end.year:
+                    continue
+                key = (row["geography_code"], row["offense_code"])
+                tally = groups.setdefault(
+                    key,
+                    {
+                        "report_id": report["report_id"],
+                        "report_type": report["report_type"],
+                        "report_end": report["report_end"],
+                        "report_revision": report["revision"],
+                        "tally_year": report_end.year,
+                        "snapshot_status": (
+                            "year_end_final"
+                            if report["report_type"] == "year_end_compstat"
+                            else "weekly_running"
+                        ),
+                        "source_sha256": report["source_sha256"],
+                        "source_page": row["source_page"],
+                        "geography_type": row["geography_type"],
+                        "geography_code": row["geography_code"],
+                        "geography_label": row["geography_label"],
+                        "offense_code": row["offense_code"],
+                        "offense_label": row["offense_label"],
+                        "last_7_days_count": None,
+                        "last_28_days_count": None,
+                        "year_to_date_count": None,
+                        "validation_status": row["validation_status"],
+                    },
+                )
+                tally[f"{row['period']}_count"] = int(float(row["value_numeric"]))
+                if row["validation_status"] != "validated":
+                    tally["validation_status"] = row["validation_status"]
+        for key in sorted(groups):
+            tally = groups[key]
+            missing = [
+                field
+                for field in (
+                    "last_7_days_count",
+                    "last_28_days_count",
+                    "year_to_date_count",
+                )
+                if tally[field] is None
+            ]
+            if missing:
+                raise ValueError(
+                    f"{report['report_id']} {key}: missing count periods {missing}"
+                )
+            tally_rows.append(tally)
+
+    _write_csv(
+        root / "data" / "compiled" / "count-tallies.csv",
+        tally_rows,
+        COUNT_TALLY_FIELDS,
+    )
+    return len(tally_rows)
+
+
 def _write_catalogs(root: Path, reports: list[dict[str, Any]]) -> None:
     reports.sort(
         key=lambda row: (
@@ -425,6 +549,7 @@ def _write_catalogs(root: Path, reports: list[dict[str, Any]]) -> None:
     _json_dump(root / "catalog" / "reports.json", reports)
     _write_csv(root / "catalog" / "reports.csv", reports, REPORT_FIELDS)
     rebuild_coverage(root, reports)
+    rebuild_compiled_counts(root, reports)
 
 
 def refresh_catalog(root: Path) -> int:
@@ -473,6 +598,134 @@ def refresh_catalog(root: Path) -> int:
         updated += 1
     _write_catalogs(root, reports)
     return updated
+
+
+def rebuild_extracted_data(root: Path) -> dict[str, int]:
+    """Reparse every archived CompStat PDF under the current extraction contract."""
+    root = root.resolve()
+    reports = load_reports(root)
+    prepared: list[
+        tuple[dict[str, Any], Any, ValidationResult, Path, dict[str, Any]]
+    ] = []
+    failures: list[str] = []
+
+    for report in reports:
+        if report.get("report_type") not in {"weekly_compstat", "year_end_compstat"}:
+            continue
+        source_path = root / report["source_path"]
+        digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        if digest != report["source_sha256"]:
+            failures.append(f"{report['report_id']}: source SHA-256 differs from catalog")
+            continue
+        parsed = parse_compstat_pdf(source_path, report["report_type"])
+        validation = validate_parsed_report(parsed)
+        if parsed.report_start.isoformat() != report["report_start"]:
+            validation.errors.append(
+                f"Catalog start date {report['report_start']} differs from PDF {parsed.report_start}"
+            )
+        if parsed.report_end.isoformat() != report["report_end"]:
+            validation.errors.append(
+                f"Catalog end date {report['report_end']} differs from PDF {parsed.report_end}"
+            )
+        if validation.errors:
+            validation.status = "failed"
+            failures.extend(
+                f"{report['report_id']}: {error}" for error in validation.errors
+            )
+            continue
+
+        _decorate_observations(
+            parsed,
+            report_id=report["report_id"],
+            report_type=report["report_type"],
+            revision=int(report["revision"]),
+            source_sha256=report["source_sha256"],
+        )
+        if report.get("data_path"):
+            relative_data_path = Path(report["data_path"])
+        elif report["report_type"] == "weekly_compstat":
+            relative_data_path = (
+                Path("data")
+                / "weekly"
+                / str(parsed.report_end.year)
+                / f"{parsed.report_end.isoformat()}-r{report['revision']}.csv"
+            )
+        else:
+            relative_data_path = (
+                Path("data")
+                / "year_end_compstat"
+                / f"{parsed.report_end.year}-r{report['revision']}.csv"
+            )
+        manifest_path = root / report["manifest_path"]
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        prepared.append(
+            (report, parsed, validation, relative_data_path, manifest)
+        )
+
+    if failures:
+        raise ValueError("Rebuild stopped before writing:\n" + "\n".join(failures))
+
+    observation_count = 0
+    warning_row_count = 0
+    for report, parsed, validation, relative_data_path, manifest in prepared:
+        _write_csv(root / relative_data_path, parsed.observations, OBSERVATION_FIELDS)
+        observation_count += len(parsed.observations)
+        warning_row_count += sum(
+            row["validation_status"] == "source_warning"
+            for row in parsed.observations
+        )
+        report.update(
+            {
+                "validation_status": validation.status,
+                "validation_warning_count": len(validation.warnings),
+                "validation_error_count": len(validation.errors),
+                "extraction_version": EXTRACTION_VERSION,
+                "data_path": str(relative_data_path).replace("\\", "/"),
+            }
+        )
+        manifest.update(
+            {
+                "validation_status": validation.status,
+                "validation_warning_count": len(validation.warnings),
+                "validation_error_count": len(validation.errors),
+                "validation_checks": validation.checks,
+                "validation_errors": validation.errors,
+                "validation_warnings": validation.warnings,
+                "extraction_error": "",
+                "extraction_version": EXTRACTION_VERSION,
+                "data_path": str(relative_data_path).replace("\\", "/"),
+            }
+        )
+        _json_dump(root / report["manifest_path"], manifest)
+
+    _write_catalogs(root, reports)
+    tally_count = rebuild_compiled_counts(root, reports)
+    migration_event_id = f"data-schema-migration-{EXTRACTION_VERSION}"
+    if not any(event.get("event_id") == migration_event_id for event in load_events(root)):
+        _append_events(
+            root / "catalog" / "events.ndjson",
+            [
+                {
+                    "event_id": migration_event_id,
+                    "event_type": "data_schema_migration",
+                    "occurred_at": datetime.now(timezone.utc)
+                    .replace(microsecond=0)
+                    .isoformat(),
+                    "extraction_version": EXTRACTION_VERSION,
+                    "report_count": len(prepared),
+                    "observation_count": observation_count,
+                    "source_warning_rows": warning_row_count,
+                    "count_tally_rows": tally_count,
+                }
+            ],
+        )
+    rebuild_changelog(root)
+    return {
+        "rebuilt_reports": len(prepared),
+        "observation_count": observation_count,
+        "source_warning_rows": warning_row_count,
+        "count_tally_rows": tally_count,
+    }
 
 
 def scan(root: Path) -> dict[str, Any]:
@@ -639,7 +892,9 @@ def _combine_csv_files(files: list[Path], output: Path) -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     count = 0
     with gzip.open(output, "wt", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=OBSERVATION_FIELDS)
+        writer = csv.DictWriter(
+            stream, fieldnames=OBSERVATION_FIELDS, lineterminator="\n"
+        )
         writer.writeheader()
         for path in files:
             with path.open(newline="", encoding="utf-8") as source:
@@ -671,6 +926,8 @@ def build_bulk_datasets(root: Path, output: Path) -> dict[str, int]:
             "comparison_year": "INTEGER",
             "comparison_lag_years": "INTEGER",
             "value_numeric": "REAL",
+            "value_ratio": "REAL",
+            "calculated_value_numeric": "REAL",
         }
         connection.execute(
             "CREATE TABLE observations ("

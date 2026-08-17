@@ -7,7 +7,13 @@ from pathlib import Path
 
 from .collector import parse_weekly_dates
 from .models import SourceCandidate
-from .pipeline import build_site, ingest_local, refresh_catalog, scan
+from .pipeline import (
+    build_site,
+    ingest_local,
+    rebuild_extracted_data,
+    refresh_catalog,
+    scan,
+)
 
 
 def _candidate_from_args(args: argparse.Namespace) -> SourceCandidate:
@@ -60,6 +66,11 @@ def build_parser() -> argparse.ArgumentParser:
         "refresh-catalog", help="Refresh catalog fields from archived manifests"
     )
     refresh_parser.add_argument("--root", type=Path, default=Path.cwd())
+    rebuild_parser = subparsers.add_parser(
+        "rebuild-data",
+        help="Reparse archived CompStat PDFs with the current extraction contract",
+    )
+    rebuild_parser.add_argument("--root", type=Path, default=Path.cwd())
     return parser
 
 
@@ -71,8 +82,10 @@ def main() -> int:
         result = ingest_local(args.root, args.pdf, _candidate_from_args(args))
     elif args.command == "build-site":
         result = {"site": str(build_site(args.root, args.output))}
-    else:
+    elif args.command == "refresh-catalog":
         result = {"refreshed_reports": refresh_catalog(args.root)}
+    else:
+        result = rebuild_extracted_data(args.root)
     print(json.dumps(result, indent=2, sort_keys=True))
     return 0
 

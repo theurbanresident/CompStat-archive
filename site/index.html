@@ -36,7 +36,7 @@
 
     <section class="notice" aria-labelledby="notice-title">
       <h2 id="notice-title">Read before analysis</h2>
-      <p>CompStat values are preliminary and can be revised. Categories reflect Delaware criminal codes and are not interchangeable with FBI Uniform Crime Reporting categories. Always cite the report ID and source SHA-256.</p>
+      <p>CompStat values are preliminary and can be revised. Categories reflect Delaware criminal codes and are not interchangeable with FBI Uniform Crime Reporting categories. Source arithmetic discrepancies are preserved and flagged alongside independently calculated values. Always cite the report ID and source SHA-256.</p>
     </section>
 
     <section id="reports" class="reports" aria-labelledby="reports-title">
@@ -91,9 +91,10 @@
       <div class="access-grid">
         <article><h3>Catalog</h3><p>One row per source revision, including hashes and validation state.</p><a href="catalog/reports.json">JSON</a> <a href="catalog/reports.csv">CSV</a></article>
         <article><h3>Event history</h3><p>Append-only additions and revisions suitable for monitoring.</p><a href="catalog/events.ndjson">NDJSON</a></article>
-        <article><h3>Schema</h3><p>Field contract and stable offense and geography dictionaries.</p><a href="schemas/observations.schema.json">JSON Schema</a></article>
+        <article><h3>Schemas</h3><p>Field contracts for normalized observations and the counts-only tally.</p><a href="schemas/observations.schema.json">Observations</a> <a href="schemas/count-tallies.schema.json">Count tallies</a></article>
         <article><h3>Weekly bulk data</h3><p>All validated weekly observations in one compressed CSV.</p><a href="bulk/weekly-observations.csv.gz">CSV.gz</a></article>
         <article><h3>Year-end bulk data</h3><p>Annual CompStat snapshots kept separate from weekly observations.</p><a href="bulk/year-end-compstat-observations.csv.gz">CSV.gz</a></article>
+        <article><h3>Counts-only running tally</h3><p>Simple weekly and year-end count snapshots with 7-day, 28-day, and year-to-date columns; no percentages.</p><a href="data/compiled/count-tallies.csv">CSV</a></article>
         <article><h3>Queryable database</h3><p>All validated observations with research indexes in SQLite.</p><a href="bulk/compstat.sqlite">SQLite</a></article>
       </div>
     </section>

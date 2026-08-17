@@ -3,7 +3,7 @@
   "discovery_method": "manual_local_ingest",
   "discovery_page": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639219693811643050",
   "extraction_error": "",
-  "extraction_version": "wilmington-compstat-v1",
+  "extraction_version": "wilmington-compstat-v2",
   "fetch_method": "local_ingest",
   "fetched_at": "2026-08-17T16:11:22+00:00",
   "issue_number": 32,
@@ -53,7 +53,7 @@
   },
   "validation_error_count": 0,
   "validation_errors": [],
-  "validation_status": "validated",
+  "validation_status": "validated_with_warnings",
   "validation_warning_count": 1,
   "validation_warnings": [
     "district_14 robbery last_28_days: source percent reported -40%, calculated -100.00%"

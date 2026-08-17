@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/wilmington-compstat/count-tallies.schema.json",
+  "title": "Wilmington CompStat counts-only tally snapshot",
+  "type": "object",
+  "required": [
+    "report_id", "report_type", "report_end", "report_revision",
+    "tally_year", "snapshot_status", "source_sha256", "source_page",
+    "geography_type", "geography_code", "geography_label",
+    "offense_code", "offense_label", "last_7_days_count",
+    "last_28_days_count", "year_to_date_count", "validation_status"
+  ],
+  "properties": {
+    "report_id": {"type": "string"},
+    "report_type": {"enum": ["weekly_compstat", "year_end_compstat"]},
+    "report_end": {"type": "string", "format": "date"},
+    "report_revision": {"type": "integer", "minimum": 1},
+    "tally_year": {"type": "integer", "minimum": 2000},
+    "snapshot_status": {"enum": ["weekly_running", "year_end_final"]},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_page": {"type": "integer", "minimum": 1},
+    "geography_type": {"enum": ["citywide", "sector", "district"]},
+    "geography_code": {"type": "string"},
+    "geography_label": {"type": "string"},
+    "offense_code": {"type": "string"},
+    "offense_label": {"type": "string"},
+    "last_7_days_count": {"type": "integer", "minimum": 0},
+    "last_28_days_count": {"type": "integer", "minimum": 0},
+    "year_to_date_count": {"type": "integer", "minimum": 0},
+    "validation_status": {"enum": ["validated", "source_warning", "failed"]}
+  }
+}

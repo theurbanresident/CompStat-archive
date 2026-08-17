@@ -16,7 +16,8 @@ versioned interpretation:
    copy with source metadata and checksums for an immutable GitHub Release.
 5. Extract embedded PDF words into a fixed, versioned table model.
 6. Validate row structure, arithmetic, geography rollups, dates, and reported
-   percentages before publishing tabular data.
+   percentages before publishing tabular data. Source arithmetic mistakes are
+   preserved but receive row-level warnings and a separately calculated value.
 7. Update the machine-readable catalog, append-only event log, human
    changelog, and accessible GitHub Pages site.
 
@@ -36,6 +37,7 @@ Python 3.11 or later is required.
 python -m pip install -e .
 python -m playwright install chromium
 compstat-archive scan --root .
+compstat-archive rebuild-data --root .
 compstat-archive build-site --root .
 python -m unittest discover -s tests -v
 ```
@@ -67,12 +69,23 @@ storage, tabular publication, or the research site.
 - `sources/wpd_year_end_report/`: original narrative annual PDFs.
 - `data/weekly/`: normalized weekly observations.
 - `data/year_end_compstat/`: normalized annual snapshots.
+- `data/compiled/count-tallies.csv`: simplified current-year count snapshots,
+  with one row per report, geography, and offense and separate 7-day, 28-day,
+  and year-to-date count columns. Weekly rows are marked `weekly_running`; the
+  calendar year-end snapshot is marked `year_end_final`.
 - `schemas/observations.schema.json`: field-level contract.
+- `schemas/count-tallies.schema.json`: counts-only compiled-file contract.
 - `data/dictionaries/`: stable offense and geography codes.
 
 `value_reported` always preserves the printed cell. A printed `*` becomes an
 empty `value_numeric` with `null_reason=undefined_zero_denominator`; it is not
-silently converted to zero.
+silently converted to zero. `value_unit` distinguishes counts from percentages.
+For a printed `25%`, `value_numeric` is `25.0` and `value_ratio` is `0.25`.
+When displayed current and prior counts permit recomputation,
+`calculated_value_numeric` records the result and `calculation_status` states
+whether it matches the source. A disagreement is retained as source evidence
+and marked `source_arithmetic_mismatch` and `source_warning`; it is never
+silently corrected.
 
 ## Automation behavior
 

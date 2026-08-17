@@ -13,11 +13,16 @@ offense_code,Stable normalized offense or measure identifier
 offense_label,Label printed in the source report
 period,last_7_days last_28_days or year_to_date
 statistic,count or percent_change
+value_unit,count or percent; explicitly identifies the unit of value_numeric
 observation_year,Year to which the printed value applies
 comparison_year,Comparison year for a reported percent change
 comparison_lag_years,Number of years between reference and comparison
-value_numeric,Parsed numeric value; blank when the source prints an undefined marker
+value_numeric,Parsed number in source scale; 25% is stored as 25.0 and a count of 25 as 25
+value_ratio,Normalized decimal representation for percentages; 25% is 0.25; blank for counts
 value_reported,Exact normalized cell text printed by the source
+calculated_value_numeric,Percent change recomputed from displayed current and prior counts when available
+calculation_status,not_applicable not_checkable matched undefined_zero_denominator or source_mismatch
+quality_flag,Machine-readable warning such as source_arithmetic_mismatch
 null_reason,Reason a printed value has no numeric representation
 extraction_version,Version of the deterministic parser
-validation_status,Whether the row passed structural total and geography-rollup publication gates
+validation_status,validated source_warning or failed at the individual-row level

@@ -125,6 +125,7 @@ def _append_observation(
     value: str,
 ) -> None:
     numeric, null_reason = _parse_value(value)
+    value_unit = "percent" if statistic == "percent_change" else "count"
     observations.append(
         {
             "source_page": page_number,
@@ -135,11 +136,22 @@ def _append_observation(
             "offense_label": offense_label,
             "period": period,
             "statistic": statistic,
+            "value_unit": value_unit,
             "observation_year": observation_year,
             "comparison_year": comparison_year,
             "comparison_lag_years": lag,
             "value_numeric": numeric,
+            "value_ratio": (
+                float(numeric) / 100
+                if value_unit == "percent" and numeric is not None
+                else None
+            ),
             "value_reported": value,
+            "calculated_value_numeric": None,
+            "calculation_status": (
+                "not_checkable" if statistic == "percent_change" else "not_applicable"
+            ),
+            "quality_flag": "",
             "null_reason": null_reason,
             "extraction_version": EXTRACTION_VERSION,
             "validation_status": "pending",

@@ -1,7 +1,7 @@
 [
   {
     "data_path": "data/weekly/2026/2026-08-09-r1.csv",
-    "extraction_version": "wilmington-compstat-v1",
+    "extraction_version": "wilmington-compstat-v2",
     "fetched_at": "2026-08-17T16:11:22+00:00",
     "issue_number": 32,
     "manifest_path": "archive/weekly/2026/2026-08-09-r1.json",
@@ -24,13 +24,13 @@
     "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639219693811643050",
     "title": "WPD CompStat Report - August 3 through August 9, 2026",
     "validation_error_count": 0,
-    "validation_status": "validated",
+    "validation_status": "validated_with_warnings",
     "validation_warning_count": 1,
     "volume": 10
   },
   {
     "data_path": "data/year_end_compstat/2025-r1.csv",
-    "extraction_version": "wilmington-compstat-v1",
+    "extraction_version": "wilmington-compstat-v2",
     "fetched_at": "2026-08-17T16:16:06+00:00",
     "issue_number": "",
     "manifest_path": "archive/year_end_compstat/2025-r1.json",
@@ -53,7 +53,7 @@
     "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/14006/639094316567800000",
     "title": "2025 Calendar Year-End CompStat Report",
     "validation_error_count": 0,
-    "validation_status": "validated",
+    "validation_status": "validated_with_warnings",
     "validation_warning_count": 1,
     "volume": 9
   },
