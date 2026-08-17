@@ -1,33 +1,30 @@
 # Wilmington CompStat Archive
 
-This repository preserves Wilmington Police Department CompStat PDFs and
-converts their statistical tables into documented, research-ready data.
+Public archive of [Wilmington Police Department CompStat reports](https://www.wilmingtonde.gov/government/public-safety/wilmington-police-department/compstat-reports), including the original PDFs and research-ready CSV data.
 
-The pipeline treats the source PDF as evidence and the extracted tables as a
-versioned interpretation:
+[Browse the archive](https://theurbanresident.github.io/CompStat-archive/) · [View releases](https://github.com/theurbanresident/CompStat-archive/releases) · [Read the changelog](CHANGELOG.md)
 
-1. Discover weekly, calendar year-end CompStat, and narrative WPD year-end
-   report links from the City's two official landing pages.
-2. Download with a polite HTTP client and fall back to a real browser when the
-   City's CDN rejects scripted requests.
-3. Identify every source revision by SHA-256. A reused City document ID or URL
-   is never treated as proof that a file is unchanged.
-4. Commit the exact, byte-identical PDF under `sources/` and stage a redundant
-   copy with source metadata and checksums for an immutable GitHub Release.
-5. Extract embedded PDF words into a fixed, versioned table model.
-6. Validate row structure, arithmetic, geography rollups, dates, and reported
-   percentages before publishing tabular data. Source arithmetic mistakes are
-   preserved but receive row-level warnings and a separately calculated value.
-7. Update the machine-readable catalog, append-only event log, human
-   changelog, and accessible GitHub Pages site.
+## Data
 
-## Collections
+- [Counts-only running tally](data/compiled/count-tallies.csv): one row per report, geography, and offense, with 7-day, 28-day, and year-to-date counts. Weekly snapshots are `weekly_running`; year-end snapshots are `year_end_final`.
+- [Weekly observations](data/weekly/): normalized weekly counts and reported percentage changes.
+- [Calendar year-end observations](data/year_end_compstat/): normalized final-year snapshots.
+- [Report catalog](catalog/reports.csv): report dates, source URLs, hashes, validation status, and file locations.
+- [Original PDFs](sources/): weekly, calendar year-end CompStat, and narrative WPD year-end reports.
 
-- `weekly_compstat`: weekly citywide, sector, and district tables.
-- `year_end_compstat`: calendar year-end CompStat tables, kept separate from
-  weekly reports even though the layout is similar.
-- `wpd_year_end_report`: narrative annual reports, cataloged separately and
-  not passed through the CompStat table parser.
+Schemas and code dictionaries are in [`schemas/`](schemas/) and [`data/dictionaries/`](data/dictionaries/). Bulk compressed CSVs and SQLite are available through the [archive site](https://theurbanresident.github.io/CompStat-archive/).
+
+## Quality and provenance
+
+Each PDF is stored unchanged and identified by SHA-256. Extracted values retain the printed value in `value_reported`. Counts and percentages are distinguished by `value_unit`; percentages also include a normalized `value_ratio`.
+
+When a reported percentage can be checked from displayed counts, the result is stored in `calculated_value_numeric`. Source arithmetic discrepancies are preserved and marked `source_arithmetic_mismatch` and `source_warning`; they are not silently corrected.
+
+CompStat figures are preliminary and may be revised. Categories reflect Delaware criminal codes and are not interchangeable with FBI Uniform Crime Reporting categories.
+
+## Automation
+
+GitHub Actions scans the City source Monday evening and Wednesday morning in New York time. New or revised PDFs, CSVs, catalogs, the counts tally, and the changelog are committed automatically. Extraction failures are archived and reported without publishing unvalidated rows.
 
 ## Run locally
 
@@ -42,86 +39,4 @@ compstat-archive build-site --root .
 python -m unittest discover -s tests -v
 ```
 
-To test a local PDF without contacting the City:
-
-```powershell
-compstat-archive ingest --root . --pdf path\to\report.pdf `
-  --title "WPD CompStat Report - August 3 through August 9, 2026" `
-  --url "https://www.wilmingtonde.gov/..." --report-type weekly_compstat
-```
-
-Original PDFs are committed under `sources/` so every Git revision remains a
-self-contained research archive. Release files are also staged under
-`dist/releases/`, which is excluded from Git, and published by GitHub Actions
-as a redundant download channel. The Pages site links to the Git-tracked PDFs
-through `raw.githubusercontent.com`; it does not duplicate them in the Pages
-deployment artifact. A temporary GitHub Releases outage does not block Git
-storage, tabular publication, or the research site.
-
-## Research entry points
-
-- `catalog/reports.csv` and `catalog/reports.json`: one record per source
-  revision.
-- `catalog/events.ndjson`: append-only archive activity.
-- `catalog/coverage.csv`: expected and observed weekly coverage.
-- `sources/weekly/`: original weekly PDFs, organized by report-ending year.
-- `sources/year_end_compstat/`: original calendar year-end CompStat PDFs.
-- `sources/wpd_year_end_report/`: original narrative annual PDFs.
-- `data/weekly/`: normalized weekly observations.
-- `data/year_end_compstat/`: normalized annual snapshots.
-- `data/compiled/count-tallies.csv`: simplified current-year count snapshots,
-  with one row per report, geography, and offense and separate 7-day, 28-day,
-  and year-to-date count columns. Weekly rows are marked `weekly_running`; the
-  calendar year-end snapshot is marked `year_end_final`.
-- `schemas/observations.schema.json`: field-level contract.
-- `schemas/count-tallies.schema.json`: counts-only compiled-file contract.
-- `data/dictionaries/`: stable offense and geography codes.
-
-`value_reported` always preserves the printed cell. A printed `*` becomes an
-empty `value_numeric` with `null_reason=undefined_zero_denominator`; it is not
-silently converted to zero. `value_unit` distinguishes counts from percentages.
-For a printed `25%`, `value_numeric` is `25.0` and `value_ratio` is `0.25`.
-When displayed current and prior counts permit recomputation,
-`calculated_value_numeric` records the result and `calculation_status` states
-whether it matches the source. A disagreement is retained as source evidence
-and marked `source_arithmetic_mismatch` and `source_warning`; it is never
-silently corrected.
-
-## Automation behavior
-
-The scheduled workflow scans Monday evening and Wednesday morning in New York
-time. Unchanged hashes cause a clean no-op. A structurally valid PDF is still
-archived if extraction fails, but unvalidated table rows are not published.
-Failures create or update a GitHub issue with diagnostics. A monthly heartbeat
-records successful monitoring so GitHub does not disable the scheduled
-workflow for repository inactivity. Changes to the pipeline, tests, or research
-site also trigger a validation run; archive-data commits do not retrigger it.
-
-While the repository is private, collection, validation, Git commits, private
-PDF storage, and issue reporting continue normally. Release publication, Pages
-configuration, artifact upload, and deployment are skipped automatically. After
-the repository becomes public, a bootstrap run publishes release copies and
-enables the Pages portion of the pipeline.
-
-Before enabling public Pages:
-
-1. Enable GitHub Pages with **GitHub Actions** as the source.
-2. Enable immutable releases in repository settings.
-3. Permit Actions to create and approve repository content, releases, Pages
-   deployments, and issues as configured in the workflow.
-4. Run the workflow manually once with **bootstrap_releases** enabled. This
-   redownloads the cataloged seed documents and publishes their immutable
-   source releases. The PDFs remain available directly in Git as well.
-
-The current source collection is small enough for ordinary Git storage. If the
-archive later approaches GitHub's repository-size limits, migrate the PDF
-download channel to releases or external object storage. Git LFS is not used
-because GitHub Pages cannot serve LFS objects directly.
-
-## Limits and responsible use
-
-The monitor makes only a few requests per scheduled run, identifies itself,
-and uses retry/backoff. Do not increase the schedule to a high-frequency
-crawler. Historical backfill must record whether a file came from the live
-City site, a City news page, or a web archive; missing weeks are recorded as
-gaps and never inferred.
+This is an independent, unofficial research archive. Original documents are attributed to the City of Wilmington, Delaware.
