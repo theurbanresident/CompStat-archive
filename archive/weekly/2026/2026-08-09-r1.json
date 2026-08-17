@@ -1,0 +1,61 @@
+{
+  "data_path": "data/weekly/2026/2026-08-09-r1.csv",
+  "discovery_method": "manual_local_ingest",
+  "discovery_page": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639219693811643050",
+  "extraction_error": "",
+  "extraction_version": "wilmington-compstat-v1",
+  "fetch_method": "local_ingest",
+  "fetched_at": "2026-08-17T16:11:22+00:00",
+  "issue_number": 32,
+  "manifest_path": "archive/weekly/2026/2026-08-09-r1.json",
+  "page_count": 25,
+  "release_asset": "wpd-compstat-report-august-3-through-august-9-2026-r1.pdf",
+  "release_tag": "source-weekly-2026-08-09-r1",
+  "release_url": "",
+  "report_end": "2026-08-09",
+  "report_id": "weekly-2026-08-09-r1",
+  "report_key": "weekly:2026-08-09",
+  "report_start": "2026-08-03",
+  "report_type": "weekly_compstat",
+  "report_year": 2026,
+  "revision": 1,
+  "source_document_id": "8310",
+  "source_sha256": "d053b8953d09a9bb575875df7c2e126133ebe930c15a86098f6a026fcdbbecf8",
+  "source_size_bytes": 1305835,
+  "source_token": "639219693811643050",
+  "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639219693811643050",
+  "title": "WPD CompStat Report - August 3 through August 9, 2026",
+  "validation_checks": {
+    "geography_count": {
+      "actual": 13,
+      "expected": 13
+    },
+    "geography_rollup_checks": 312,
+    "major_crime_total_checks": 78,
+    "observation_count": {
+      "actual": 2366,
+      "expected": 2366
+    },
+    "one_year_percent_checks": 507,
+    "page_count": {
+      "actual": 25,
+      "expected": 25
+    },
+    "source_row_count": {
+      "actual": 169,
+      "expected": 169
+    },
+    "table_page_count": {
+      "actual": 13,
+      "expected": 13
+    }
+  },
+  "validation_error_count": 0,
+  "validation_errors": [],
+  "validation_status": "validated",
+  "validation_warning_count": 1,
+  "validation_warnings": [
+    "district_14 robbery last_28_days: source percent reported -40%, calculated -100.00%"
+  ],
+  "volume": 10
+}

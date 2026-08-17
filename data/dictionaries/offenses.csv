@@ -1,0 +1,15 @@
+offense_code,offense_label,is_major_crime,is_total,includes_other_rows
+murder,Murder,true,false,
+rape,Rape,true,false,
+robbery,Robbery,true,false,
+aggravated_assault,Agg. Assault,true,false,
+burglary,Burglary,true,false,
+felony_theft,Felony Theft,true,false,
+auto_theft,Auto Theft,true,false,
+major_crime_total,TOTAL,false,true,"murder|rape|robbery|aggravated_assault|burglary|felony_theft|auto_theft"
+shooting_incidents,Shooting Incidents,false,false,
+shooting_victims,Shooting Victims,false,false,
+juvenile_shooting_incidents,*Juv Shooting Incidents,false,false,shooting_incidents
+juvenile_shooting_victims,*Juv Shooting Victims,false,false,shooting_victims
+misdemeanor_theft,Theft (Misdemeanor),false,false,
+

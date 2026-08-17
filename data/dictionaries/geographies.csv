@@ -1,0 +1,15 @@
+geography_code,geography_label,geography_type,parent_code
+citywide,Citywide,citywide,
+sector_1,Sector 1,sector,citywide
+district_12,District 12,district,sector_1
+district_13,District 13,district,sector_1
+district_14,District 14,district,sector_1
+sector_2,Sector 2,sector,citywide
+district_10,District 10,district,sector_2
+district_11,District 11,district,sector_2
+district_16,District 16,district,sector_2
+sector_3,Sector 3,sector,citywide
+district_17,District 17,district,sector_3
+district_18,District 18,district,sector_3
+district_19,District 19,district,sector_3
+

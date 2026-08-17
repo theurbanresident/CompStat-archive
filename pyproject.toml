@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wilmington-compstat-archive"
+version = "0.1.0"
+description = "Reproducible archive and tabular extraction pipeline for Wilmington, Delaware CompStat reports"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "pdfplumber>=0.11,<1",
+  "pypdf>=5,<7",
+  "playwright>=1.52,<2",
+]
+
+[project.scripts]
+compstat-archive = "compstat_archive.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

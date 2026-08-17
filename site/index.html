@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Search and download the public Wilmington, Delaware CompStat archive.">
+  <title>Wilmington CompStat Archive</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#reports">Skip to reports</a>
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow">Independent public research archive</p>
+      <h1>Wilmington CompStat Archive</h1>
+      <p class="lede">Original source revisions, reproducible table extraction, and machine-readable crime statistics from Wilmington, Delaware.</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="catalog/reports.csv">Download report catalog</a>
+        <a class="button" href="catalog/coverage.csv">View coverage CSV</a>
+        <a class="button" href="CHANGELOG.md">Changelog</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="summary" aria-labelledby="summary-title">
+      <h2 id="summary-title" class="sr-only">Archive summary</h2>
+      <article><strong id="report-count">-</strong><span>source revisions</span></article>
+      <article><strong id="weekly-count">-</strong><span>weekly reports</span></article>
+      <article><strong id="year-count">-</strong><span>year-end documents</span></article>
+      <article><strong id="latest-date">-</strong><span>latest period ending</span></article>
+    </section>
+
+    <section class="notice" aria-labelledby="notice-title">
+      <h2 id="notice-title">Read before analysis</h2>
+      <p>CompStat values are preliminary and can be revised. Categories reflect Delaware criminal codes and are not interchangeable with FBI Uniform Crime Reporting categories. Always cite the report ID and source SHA-256.</p>
+    </section>
+
+    <section id="reports" class="reports" aria-labelledby="reports-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Browse the evidence</p>
+          <h2 id="reports-title">Reports and data</h2>
+        </div>
+        <p id="result-count" aria-live="polite"></p>
+      </div>
+
+      <form class="filters" id="filters">
+        <label>Collection
+          <select id="type-filter">
+            <option value="">All collections</option>
+            <option value="weekly_compstat">Weekly CompStat</option>
+            <option value="year_end_compstat">Calendar year-end CompStat</option>
+            <option value="wpd_year_end_report">Narrative WPD year-end report</option>
+          </select>
+        </label>
+        <label>Year
+          <select id="year-filter"><option value="">All years</option></select>
+        </label>
+        <label class="search-label">Search
+          <input id="search-filter" type="search" placeholder="Date, report ID, or title">
+        </label>
+        <button class="button" type="reset">Reset</button>
+      </form>
+
+      <div class="table-wrap" tabindex="0" aria-label="Scrollable report table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Period</th>
+              <th scope="col">Collection</th>
+              <th scope="col">Revision</th>
+              <th scope="col">Status</th>
+              <th scope="col">Research files</th>
+              <th scope="col">Provenance</th>
+            </tr>
+          </thead>
+          <tbody id="report-rows">
+            <tr><td colspan="6">Loading catalog...</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p id="load-error" class="error" role="alert" hidden></p>
+    </section>
+
+    <section class="access" aria-labelledby="access-title">
+      <h2 id="access-title">Machine access</h2>
+      <div class="access-grid">
+        <article><h3>Catalog</h3><p>One row per source revision, including hashes and validation state.</p><a href="catalog/reports.json">JSON</a> <a href="catalog/reports.csv">CSV</a></article>
+        <article><h3>Event history</h3><p>Append-only additions and revisions suitable for monitoring.</p><a href="catalog/events.ndjson">NDJSON</a></article>
+        <article><h3>Schema</h3><p>Field contract and stable offense and geography dictionaries.</p><a href="schemas/observations.schema.json">JSON Schema</a></article>
+        <article><h3>Weekly bulk data</h3><p>All validated weekly observations in one compressed CSV.</p><a href="bulk/weekly-observations.csv.gz">CSV.gz</a></article>
+        <article><h3>Year-end bulk data</h3><p>Annual CompStat snapshots kept separate from weekly observations.</p><a href="bulk/year-end-compstat-observations.csv.gz">CSV.gz</a></article>
+        <article><h3>Queryable database</h3><p>All validated observations with research indexes in SQLite.</p><a href="bulk/compstat.sqlite">SQLite</a></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>This archive is independent and unofficial. Original documents are attributed to the City of Wilmington, Delaware.</p>
+  </footer>
+</body>
+</html>

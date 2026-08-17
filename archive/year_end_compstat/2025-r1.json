@@ -1,0 +1,61 @@
+{
+  "data_path": "data/year_end_compstat/2025-r1.csv",
+  "discovery_method": "manual_local_ingest",
+  "discovery_page": "https://www.wilmingtonde.gov/home/showpublisheddocument/14006/639094316567800000",
+  "extraction_error": "",
+  "extraction_version": "wilmington-compstat-v1",
+  "fetch_method": "local_ingest",
+  "fetched_at": "2026-08-17T16:16:06+00:00",
+  "issue_number": "",
+  "manifest_path": "archive/year_end_compstat/2025-r1.json",
+  "page_count": 25,
+  "release_asset": "2025-calendar-year-end-compstat-report-r1.pdf",
+  "release_tag": "source-year-end-compstat-2025-r1",
+  "release_url": "",
+  "report_end": "2025-12-31",
+  "report_id": "year-end-compstat-2025-r1",
+  "report_key": "year_end_compstat:2025",
+  "report_start": "2025-01-01",
+  "report_type": "year_end_compstat",
+  "report_year": 2025,
+  "revision": 1,
+  "source_document_id": "14006",
+  "source_sha256": "3c3b151aad3d007f2279cf5735d63f591623eff526770c425b726af0d950cfb2",
+  "source_size_bytes": 1250508,
+  "source_token": "639094316567800000",
+  "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/14006/639094316567800000",
+  "title": "2025 Calendar Year-End CompStat Report",
+  "validation_checks": {
+    "geography_count": {
+      "actual": 13,
+      "expected": 13
+    },
+    "geography_rollup_checks": 312,
+    "major_crime_total_checks": 78,
+    "observation_count": {
+      "actual": 2366,
+      "expected": 2366
+    },
+    "one_year_percent_checks": 507,
+    "page_count": {
+      "actual": 25,
+      "expected": 25
+    },
+    "source_row_count": {
+      "actual": 169,
+      "expected": 169
+    },
+    "table_page_count": {
+      "actual": 13,
+      "expected": 13
+    }
+  },
+  "validation_error_count": 0,
+  "validation_errors": [],
+  "validation_status": "validated",
+  "validation_warning_count": 1,
+  "validation_warnings": [
+    "district_14 robbery last_28_days: source percent reported 25%, calculated 100.00%"
+  ],
+  "volume": 9
+}

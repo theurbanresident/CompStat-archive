@@ -1,0 +1,23 @@
+field,description
+report_id,Stable archive identifier including source revision
+report_type,weekly_compstat or year_end_compstat
+report_start,First date represented by the report
+report_end,Last date represented by the report
+report_revision,Revision number for a report period starting at 1
+source_sha256,SHA-256 digest of the exact source PDF
+source_page,One-based PDF page containing the printed value
+geography_type,citywide sector or district
+geography_code,Stable normalized geography identifier
+geography_label,Label printed in the source report
+offense_code,Stable normalized offense or measure identifier
+offense_label,Label printed in the source report
+period,last_7_days last_28_days or year_to_date
+statistic,count or percent_change
+observation_year,Year to which the printed value applies
+comparison_year,Comparison year for a reported percent change
+comparison_lag_years,Number of years between reference and comparison
+value_numeric,Parsed numeric value; blank when the source prints an undefined marker
+value_reported,Exact normalized cell text printed by the source
+null_reason,Reason a printed value has no numeric representation
+extraction_version,Version of the deterministic parser
+validation_status,Whether the row passed structural total and geography-rollup publication gates

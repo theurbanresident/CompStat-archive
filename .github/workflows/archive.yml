@@ -1,0 +1,105 @@
+name: Archive Wilmington CompStat reports
+
+on:
+  schedule:
+    - cron: "23 17 * * 1"
+      timezone: "America/New_York"
+    - cron: "23 11 * * 3"
+      timezone: "America/New_York"
+  workflow_dispatch:
+    inputs:
+      bootstrap_releases:
+        description: "Re-stage every cataloged source whose live link is still available"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: compstat-archive
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+  pages: write
+  id-token: write
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out archive
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install archive tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+          python -m playwright install --with-deps chromium
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Scan City sources
+        env:
+          COMPSTAT_BOOTSTRAP_RELEASES: ${{ inputs.bootstrap_releases && '1' || '0' }}
+        run: compstat-archive scan --root .
+
+      - name: Commit manifests and validated data
+        id: commit
+        shell: bash
+        run: |
+          git config user.name "wilmington-compstat-bot"
+          git config user.email "wilmington-compstat-bot@users.noreply.github.com"
+          git add archive catalog data CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            report_count="$(python -c 'import json; print(json.load(open("dist/run-summary.json"))["new_report_count"])')"
+            git commit -m "archive: add ${report_count} source report update(s)"
+            git push
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish immutable-source release candidates
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m compstat_archive.automation publish-releases --root .
+
+      - name: Report extraction or download problems
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m compstat_archive.automation report-failures --root .
+
+      - name: Build research site
+        run: compstat-archive build-site --root . --output _site
+
+      - name: Configure GitHub Pages
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    needs: archive
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy research site
+        id: deployment
+        uses: actions/deploy-pages@v4

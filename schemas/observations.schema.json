@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/wilmington-compstat/observations.schema.json",
+  "title": "Wilmington CompStat observation",
+  "type": "object",
+  "required": [
+    "report_id", "report_type", "report_start", "report_end",
+    "report_revision", "source_sha256", "source_page", "geography_type",
+    "geography_code", "offense_code", "period", "statistic",
+    "value_reported", "extraction_version", "validation_status"
+  ],
+  "properties": {
+    "report_id": {"type": "string"},
+    "report_type": {"enum": ["weekly_compstat", "year_end_compstat"]},
+    "report_start": {"type": "string", "format": "date"},
+    "report_end": {"type": "string", "format": "date"},
+    "report_revision": {"type": "integer", "minimum": 1},
+    "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_page": {"type": "integer", "minimum": 1},
+    "geography_type": {"enum": ["citywide", "sector", "district"]},
+    "geography_code": {"type": "string"},
+    "offense_code": {"type": "string"},
+    "period": {"enum": ["last_7_days", "last_28_days", "year_to_date"]},
+    "statistic": {"enum": ["count", "percent_change"]},
+    "observation_year": {"type": ["integer", "null"]},
+    "comparison_year": {"type": ["integer", "null"]},
+    "comparison_lag_years": {"type": ["integer", "null"]},
+    "value_numeric": {"type": ["number", "null"]},
+    "value_reported": {"type": "string"},
+    "null_reason": {"type": ["string", "null"]},
+    "extraction_version": {"type": "string"},
+    "validation_status": {"enum": ["validated", "failed"]}
+  }
+}
+
