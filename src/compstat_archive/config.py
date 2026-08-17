@@ -96,6 +96,7 @@ REPORT_FIELDS = [
     "source_url",
     "source_document_id",
     "source_token",
+    "source_path",
     "source_sha256",
     "source_size_bytes",
     "fetched_at",

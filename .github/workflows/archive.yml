@@ -53,13 +53,13 @@ jobs:
           COMPSTAT_BOOTSTRAP_RELEASES: ${{ inputs.bootstrap_releases && '1' || '0' }}
         run: compstat-archive scan --root .
 
-      - name: Commit manifests and validated data
+      - name: Commit original PDFs, manifests, and validated data
         id: commit
         shell: bash
         run: |
           git config user.name "wilmington-compstat-bot"
           git config user.email "wilmington-compstat-bot@users.noreply.github.com"
-          git add archive catalog data CHANGELOG.md
+          git add archive catalog data sources CHANGELOG.md
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else

@@ -12,8 +12,8 @@ versioned interpretation:
    City's CDN rejects scripted requests.
 3. Identify every source revision by SHA-256. A reused City document ID or URL
    is never treated as proof that a file is unchanged.
-4. Stage the exact PDF, source metadata, and checksums for an immutable GitHub
-   Release.
+4. Commit the exact, byte-identical PDF under `sources/` and stage a redundant
+   copy with source metadata and checksums for an immutable GitHub Release.
 5. Extract embedded PDF words into a fixed, versioned table model.
 6. Validate row structure, arithmetic, geography rollups, dates, and reported
    percentages before publishing tabular data.
@@ -48,9 +48,10 @@ compstat-archive ingest --root . --pdf path\to\report.pdf `
   --url "https://www.wilmingtonde.gov/..." --report-type weekly_compstat
 ```
 
-The source release files are staged under `dist/releases/`, which is excluded
-from Git. The GitHub Actions workflow commits manifests and validated CSVs,
-then publishes those staged files as releases.
+Original PDFs are committed under `sources/` so every Git revision remains a
+self-contained research archive. Release files are also staged under
+`dist/releases/`, which is excluded from Git, and published by GitHub Actions
+as a redundant download channel.
 
 ## Research entry points
 
@@ -58,6 +59,9 @@ then publishes those staged files as releases.
   revision.
 - `catalog/events.ndjson`: append-only archive activity.
 - `catalog/coverage.csv`: expected and observed weekly coverage.
+- `sources/weekly/`: original weekly PDFs, organized by report-ending year.
+- `sources/year_end_compstat/`: original calendar year-end CompStat PDFs.
+- `sources/wpd_year_end_report/`: original narrative annual PDFs.
 - `data/weekly/`: normalized weekly observations.
 - `data/year_end_compstat/`: normalized annual snapshots.
 - `schemas/observations.schema.json`: field-level contract.
@@ -85,7 +89,11 @@ Before enabling automation:
    deployments, and issues as configured in the workflow.
 5. Run the workflow manually once with **bootstrap_releases** enabled. This
    redownloads the cataloged seed documents and publishes their immutable
-   source releases without committing the PDFs to Git history.
+   source releases. The PDFs remain available directly in Git as well.
+
+The current source collection is small enough for ordinary Git storage. If the
+archive later approaches GitHub's repository-size limits, migrate `sources/`
+to Git LFS without changing the catalog paths or research interface.
 
 ## Limits and responsible use
 

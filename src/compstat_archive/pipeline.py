@@ -77,6 +77,34 @@ def _manifest_path(candidate: SourceCandidate, revision: int) -> Path:
     return Path("archive") / folder / f"{candidate.report_year}-r{revision}.json"
 
 
+def _source_path(candidate: SourceCandidate, revision: int) -> Path:
+    """Return the stable, Git-tracked path for an unmodified source PDF."""
+    if candidate.report_type == "weekly_compstat":
+        assert candidate.report_end is not None
+        return Path("sources") / "weekly" / str(candidate.report_end.year) / (
+            f"{candidate.report_end.isoformat()}-r{revision}.pdf"
+        )
+    assert candidate.report_year is not None
+    return (
+        Path("sources")
+        / candidate.report_type
+        / f"{candidate.report_year}-r{revision}.pdf"
+    )
+
+
+def _preserve_source_pdf(root: Path, relative_path: Path, pdf_bytes: bytes) -> None:
+    """Write a byte-identical source once, refusing an inconsistent overwrite."""
+    destination = root / relative_path
+    if destination.exists():
+        if destination.read_bytes() != pdf_bytes:
+            raise ValueError(
+                f"Tracked source path already contains different bytes: {relative_path}"
+            )
+        return
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(pdf_bytes)
+
+
 def load_reports(root: Path) -> list[dict[str, Any]]:
     path = root / "catalog" / "reports.json"
     if not path.exists():
@@ -221,6 +249,7 @@ def process_candidate(
         "source_url": candidate.url,
         "source_document_id": document_id or "",
         "source_token": source_token or "",
+        "source_path": str(_source_path(candidate, revision)).replace("\\", "/"),
         "source_sha256": sha256,
         "source_size_bytes": len(pdf_bytes),
         "fetched_at": fetched_at,
@@ -266,6 +295,7 @@ def process_candidate(
 
     manifest_path = _manifest_path(candidate, revision)
     manifest["manifest_path"] = str(manifest_path).replace("\\", "/")
+    _preserve_source_pdf(root, _source_path(candidate, revision), pdf_bytes)
     _json_dump(root / manifest_path, manifest)
     release_plan = _stage_release(root, candidate, pdf_bytes, manifest)
 
@@ -424,11 +454,15 @@ def refresh_catalog(root: Path) -> int:
             continue
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest["manifest_path"] = str(relative_path).replace("\\", "/")
+        manifest["source_path"] = str(
+            _source_path(candidate, int(report["revision"]))
+        ).replace("\\", "/")
         manifest["validation_warning_count"] = len(manifest.get("validation_warnings", []))
         manifest["validation_error_count"] = len(manifest.get("validation_errors", []))
         _json_dump(manifest_path, manifest)
         for field in (
             "manifest_path",
+            "source_path",
             "validation_warning_count",
             "validation_error_count",
         ):
@@ -582,7 +616,7 @@ def build_site(root: Path, output: Path | None = None) -> Path:
         raise ValueError(f"Refusing to build over unsafe output directory: {output}")
     output.mkdir(parents=True, exist_ok=True)
     shutil.copytree(root / "site", output, dirs_exist_ok=True)
-    for name in ("catalog", "data", "archive", "schemas"):
+    for name in ("catalog", "data", "archive", "schemas", "sources"):
         source = root / name
         if source.exists():
             shutil.copytree(source, output / name, dirs_exist_ok=True)

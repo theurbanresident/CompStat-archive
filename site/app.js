@@ -21,6 +21,10 @@ function releaseUrl(report) {
   return `https://github.com/${owner}/${repository}/releases/download/${report.release_tag}/${report.release_asset}`;
 }
 
+function sourcePdfUrl(report) {
+  return report.source_path || releaseUrl(report);
+}
+
 function period(report) {
   if (report.report_type === "weekly_compstat") {
     return `${report.report_start}<br><strong>to ${report.report_end}</strong>`;
@@ -45,7 +49,7 @@ function render() {
   });
   document.querySelector("#result-count").textContent = `${state.filtered.length} result${state.filtered.length === 1 ? "" : "s"}`;
   const rows = state.filtered.map(report => {
-    const source = releaseUrl(report);
+    const source = sourcePdfUrl(report);
     const files = [
       source ? `<a href="${text(source)}">Original PDF</a>` : "",
       report.data_path ? `<a href="${text(report.data_path)}">Extracted CSV</a>` : "",
