@@ -80,7 +80,8 @@ time. Unchanged hashes cause a clean no-op. A structurally valid PDF is still
 archived if extraction fails, but unvalidated table rows are not published.
 Failures create or update a GitHub issue with diagnostics. A monthly heartbeat
 records successful monitoring so GitHub does not disable the scheduled
-workflow for repository inactivity.
+workflow for repository inactivity. Changes to the pipeline, tests, or research
+site also trigger a validation run; archive-data commits do not retrigger it.
 
 While the repository is private, collection, validation, Git commits, private
 release assets, and issue reporting continue normally. Pages configuration,
