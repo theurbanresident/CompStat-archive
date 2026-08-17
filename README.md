@@ -53,7 +53,8 @@ self-contained research archive. Release files are also staged under
 `dist/releases/`, which is excluded from Git, and published by GitHub Actions
 as a redundant download channel. The Pages site links to the Git-tracked PDFs
 through `raw.githubusercontent.com`; it does not duplicate them in the Pages
-deployment artifact.
+deployment artifact. A temporary GitHub Releases outage does not block Git
+storage, tabular publication, or the research site.
 
 ## Research entry points
 

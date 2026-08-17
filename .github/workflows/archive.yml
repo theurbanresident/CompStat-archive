@@ -79,8 +79,9 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish immutable-source release candidates
+      - name: Attempt redundant immutable-source releases
         if: github.event.repository.visibility == 'public'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m compstat_archive.automation publish-releases --root .
