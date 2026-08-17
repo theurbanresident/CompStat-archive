@@ -22,8 +22,9 @@ class PipelineTests(unittest.TestCase):
             self.assertTrue((built / "bulk" / "weekly-observations.csv.gz").exists())
             self.assertTrue((built / "bulk" / "compstat.sqlite").exists())
             for report in catalog:
-                source = built / report["source_path"]
+                source = root / report["source_path"]
                 self.assertTrue(source.exists(), report["source_path"])
+                self.assertFalse((built / report["source_path"]).exists())
                 self.assertEqual(
                     hashlib.sha256(source.read_bytes()).hexdigest(),
                     report["source_sha256"],

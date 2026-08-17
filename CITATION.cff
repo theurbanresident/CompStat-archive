@@ -5,6 +5,5 @@ type: dataset
 version: 0.1.0
 date-released: 2026-08-17
 license: MIT
-repository-code: "https://github.com/OWNER/wilmington-compstat-archive"
+repository-code: "https://github.com/theurbanresident/wilmington-compstat-archive"
 abstract: "A revision-aware public archive and reproducible tabular extraction of Wilmington, Delaware Police Department CompStat reports."
-

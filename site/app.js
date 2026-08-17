@@ -6,6 +6,19 @@ const labels = {
   wpd_year_end_report: "Narrative WPD year-end report",
 };
 
+function repositoryCoordinates() {
+  const configured = document.querySelector('meta[name="github-repository"]')?.content;
+  if (configured) return configured;
+  if (!location.hostname.endsWith("github.io")) return "";
+  const owner = location.hostname.split(".")[0];
+  const repository = location.pathname.split("/").filter(Boolean)[0];
+  return owner && repository ? `${owner}/${repository}` : "";
+}
+
+function repositoryBranch() {
+  return document.querySelector('meta[name="github-default-branch"]')?.content || "main";
+}
+
 function text(value) {
   return String(value ?? "").replace(/[&<>'"]/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
@@ -14,15 +27,18 @@ function text(value) {
 
 function releaseUrl(report) {
   if (report.release_url) return report.release_url;
-  if (!location.hostname.endsWith("github.io")) return "";
-  const owner = location.hostname.split(".")[0];
-  const repository = location.pathname.split("/").filter(Boolean)[0];
-  if (!owner || !repository) return "";
-  return `https://github.com/${owner}/${repository}/releases/download/${report.release_tag}/${report.release_asset}`;
+  const repository = repositoryCoordinates();
+  if (!repository) return "";
+  return `https://github.com/${repository}/releases/download/${report.release_tag}/${report.release_asset}`;
 }
 
 function sourcePdfUrl(report) {
-  return report.source_path || releaseUrl(report);
+  const repository = repositoryCoordinates();
+  if (repository && report.source_path) {
+    const path = report.source_path.split("/").map(encodeURIComponent).join("/");
+    return `https://raw.githubusercontent.com/${repository}/${repositoryBranch()}/${path}`;
+  }
+  return releaseUrl(report);
 }
 
 function period(report) {

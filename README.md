@@ -51,7 +51,9 @@ compstat-archive ingest --root . --pdf path\to\report.pdf `
 Original PDFs are committed under `sources/` so every Git revision remains a
 self-contained research archive. Release files are also staged under
 `dist/releases/`, which is excluded from Git, and published by GitHub Actions
-as a redundant download channel.
+as a redundant download channel. The Pages site links to the Git-tracked PDFs
+through `raw.githubusercontent.com`; it does not duplicate them in the Pages
+deployment artifact.
 
 ## Research entry points
 
@@ -82,18 +84,18 @@ workflow for repository inactivity.
 
 Before enabling automation:
 
-1. Replace `OWNER` in `CITATION.cff` after creating the GitHub repository.
-2. Enable GitHub Pages with **GitHub Actions** as the source.
-3. Enable immutable releases in repository settings.
-4. Permit Actions to create and approve repository content, releases, Pages
+1. Enable GitHub Pages with **GitHub Actions** as the source.
+2. Enable immutable releases in repository settings.
+3. Permit Actions to create and approve repository content, releases, Pages
    deployments, and issues as configured in the workflow.
-5. Run the workflow manually once with **bootstrap_releases** enabled. This
+4. Run the workflow manually once with **bootstrap_releases** enabled. This
    redownloads the cataloged seed documents and publishes their immutable
    source releases. The PDFs remain available directly in Git as well.
 
 The current source collection is small enough for ordinary Git storage. If the
-archive later approaches GitHub's repository-size limits, migrate `sources/`
-to Git LFS without changing the catalog paths or research interface.
+archive later approaches GitHub's repository-size limits, migrate the PDF
+download channel to releases or external object storage. Git LFS is not used
+because GitHub Pages cannot serve LFS objects directly.
 
 ## Limits and responsible use
 

@@ -616,7 +616,9 @@ def build_site(root: Path, output: Path | None = None) -> Path:
         raise ValueError(f"Refusing to build over unsafe output directory: {output}")
     output.mkdir(parents=True, exist_ok=True)
     shutil.copytree(root / "site", output, dirs_exist_ok=True)
-    for name in ("catalog", "data", "archive", "schemas", "sources"):
+    # PDFs stay versioned in Git and are linked through raw.githubusercontent.com.
+    # Excluding them here prevents the Pages artifact from duplicating the archive.
+    for name in ("catalog", "data", "archive", "schemas"):
         source = root / name
         if source.exists():
             shutil.copytree(source, output / name, dirs_exist_ok=True)
