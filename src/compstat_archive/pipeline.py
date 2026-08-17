@@ -118,7 +118,10 @@ def _page_count(pdf_path: Path) -> int:
 
 def _release_url(tag: str, asset: str) -> str:
     repository = os.environ.get("GITHUB_REPOSITORY", "")
-    if not repository:
+    if (
+        not repository
+        or os.environ.get("COMPSTAT_REPOSITORY_VISIBILITY", "") == "private"
+    ):
         return ""
     return f"https://github.com/{repository}/releases/download/{tag}/{asset}"
 
@@ -476,13 +479,18 @@ def scan(root: Path) -> dict[str, Any]:
     root = root.resolve()
     reports = load_reports(root)
     repository = os.environ.get("GITHUB_REPOSITORY", "")
+    repository_is_private = (
+        os.environ.get("COMPSTAT_REPOSITORY_VISIBILITY", "") == "private"
+    )
     catalog_changed = False
     if repository:
         for existing_report in reports:
-            expected_url = (
-                f"https://github.com/{repository}/releases/download/"
-                f"{existing_report['release_tag']}/{existing_report['release_asset']}"
-            )
+            expected_url = ""
+            if not repository_is_private:
+                expected_url = (
+                    f"https://github.com/{repository}/releases/download/"
+                    f"{existing_report['release_tag']}/{existing_report['release_asset']}"
+                )
             if existing_report.get("release_url") != expected_url:
                 existing_report["release_url"] = expected_url
                 catalog_changed = True

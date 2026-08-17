@@ -60,6 +60,7 @@ jobs:
       - name: Scan City sources
         env:
           COMPSTAT_BOOTSTRAP_RELEASES: ${{ inputs.bootstrap_releases && '1' || '0' }}
+          COMPSTAT_REPOSITORY_VISIBILITY: ${{ github.event.repository.visibility }}
         run: compstat-archive scan --root .
 
       - name: Commit original PDFs, manifests, and validated data
@@ -79,6 +80,7 @@ jobs:
           fi
 
       - name: Publish immutable-source release candidates
+        if: github.event.repository.visibility == 'public'
         env:
           GH_TOKEN: ${{ github.token }}
         run: python -m compstat_archive.automation publish-releases --root .

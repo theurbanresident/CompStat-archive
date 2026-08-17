@@ -84,9 +84,10 @@ workflow for repository inactivity. Changes to the pipeline, tests, or research
 site also trigger a validation run; archive-data commits do not retrigger it.
 
 While the repository is private, collection, validation, Git commits, private
-release assets, and issue reporting continue normally. Pages configuration,
-artifact upload, and deployment are skipped automatically. After the repository
-becomes public, the next workflow run enables the Pages portion of the pipeline.
+PDF storage, and issue reporting continue normally. Release publication, Pages
+configuration, artifact upload, and deployment are skipped automatically. After
+the repository becomes public, a bootstrap run publishes release copies and
+enables the Pages portion of the pipeline.
 
 Before enabling public Pages:
 
