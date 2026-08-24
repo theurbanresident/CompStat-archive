@@ -1,0 +1,62 @@
+{
+  "data_path": "data/weekly/2026/2026-08-16-r1.csv",
+  "discovery_method": "live_city_page",
+  "discovery_page": "https://www.wilmingtonde.gov/government/public-safety/wilmington-police-department/compstat-reports",
+  "extraction_error": "",
+  "extraction_version": "wilmington-compstat-v2",
+  "fetch_method": "http",
+  "fetched_at": "2026-08-24T21:49:26+00:00",
+  "issue_number": 33,
+  "manifest_path": "archive/weekly/2026/2026-08-16-r1.json",
+  "page_count": 25,
+  "release_asset": "wpd-compstat-report-august-10-through-august-16-2026-r1.pdf",
+  "release_tag": "source-weekly-2026-08-16-r1",
+  "release_url": "https://github.com/theurbanresident/CompStat-archive/releases/download/source-weekly-2026-08-16-r1/wpd-compstat-report-august-10-through-august-16-2026-r1.pdf",
+  "report_end": "2026-08-16",
+  "report_id": "weekly-2026-08-16-r1",
+  "report_key": "weekly:2026-08-16",
+  "report_start": "2026-08-10",
+  "report_type": "weekly_compstat",
+  "report_year": 2026,
+  "revision": 1,
+  "source_document_id": "8310",
+  "source_path": "sources/weekly/2026/2026-08-16-r1.pdf",
+  "source_sha256": "7d23f10cc3e90aaa48cbc3bc24227cb4b6b80a37030aa250dc8b08f3ed7f5917",
+  "source_size_bytes": 1305553,
+  "source_token": "639226674794370000",
+  "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639226674794370000",
+  "title": "WPD CompStat Report - August 10 through August 16, 2026",
+  "validation_checks": {
+    "geography_count": {
+      "actual": 13,
+      "expected": 13
+    },
+    "geography_rollup_checks": 312,
+    "major_crime_total_checks": 78,
+    "observation_count": {
+      "actual": 2366,
+      "expected": 2366
+    },
+    "one_year_percent_checks": 507,
+    "page_count": {
+      "actual": 25,
+      "expected": 25
+    },
+    "source_row_count": {
+      "actual": 169,
+      "expected": 169
+    },
+    "table_page_count": {
+      "actual": 13,
+      "expected": 13
+    }
+  },
+  "validation_error_count": 0,
+  "validation_errors": [],
+  "validation_status": "validated_with_warnings",
+  "validation_warning_count": 1,
+  "validation_warnings": [
+    "district_14 robbery last_28_days: source percent reported -50%, calculated -100.00%"
+  ],
+  "volume": 10
+}
