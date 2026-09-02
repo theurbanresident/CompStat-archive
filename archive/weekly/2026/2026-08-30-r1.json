@@ -1,0 +1,60 @@
+{
+  "data_path": "data/weekly/2026/2026-08-30-r1.csv",
+  "discovery_method": "live_city_page",
+  "discovery_page": "https://www.wilmingtonde.gov/government/public-safety/wilmington-police-department/compstat-reports",
+  "extraction_error": "",
+  "extraction_version": "wilmington-compstat-v2",
+  "fetch_method": "http",
+  "fetched_at": "2026-09-02T18:48:12+00:00",
+  "issue_number": 35,
+  "manifest_path": "archive/weekly/2026/2026-08-30-r1.json",
+  "page_count": 25,
+  "release_asset": "wpd-compstat-report-august-24-through-august-30-2026-r1.pdf",
+  "release_tag": "source-weekly-2026-08-30-r1",
+  "release_url": "https://github.com/theurbanresident/CompStat-archive/releases/download/source-weekly-2026-08-30-r1/wpd-compstat-report-august-24-through-august-30-2026-r1.pdf",
+  "report_end": "2026-08-30",
+  "report_id": "weekly-2026-08-30-r1",
+  "report_key": "weekly:2026-08-30",
+  "report_start": "2026-08-24",
+  "report_type": "weekly_compstat",
+  "report_year": 2026,
+  "revision": 1,
+  "source_document_id": "8310",
+  "source_path": "sources/weekly/2026/2026-08-30-r1.pdf",
+  "source_sha256": "5a657b849798801bb3e72d7c7f9e501e1e7ecdf13c2392207e08a3ff641c965f",
+  "source_size_bytes": 1305911,
+  "source_token": "639234124650017054",
+  "source_url": "https://www.wilmingtonde.gov/home/showpublisheddocument/8310/639234124650017054",
+  "title": "WPD CompStat Report - August 24 through August 30, 2026",
+  "validation_checks": {
+    "geography_count": {
+      "actual": 13,
+      "expected": 13
+    },
+    "geography_rollup_checks": 312,
+    "major_crime_total_checks": 78,
+    "observation_count": {
+      "actual": 2366,
+      "expected": 2366
+    },
+    "one_year_percent_checks": 507,
+    "page_count": {
+      "actual": 25,
+      "expected": 25
+    },
+    "source_row_count": {
+      "actual": 169,
+      "expected": 169
+    },
+    "table_page_count": {
+      "actual": 13,
+      "expected": 13
+    }
+  },
+  "validation_error_count": 0,
+  "validation_errors": [],
+  "validation_status": "validated",
+  "validation_warning_count": 0,
+  "validation_warnings": [],
+  "volume": 10
+}
