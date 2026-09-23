@@ -3,6 +3,10 @@
 Generated from `catalog/events.ndjson`. Source revisions and extraction status
 are recorded separately so researchers can identify the exact evidence used.
 
+## 2026-09-23
+
+- Added `weekly-2026-09-20-r1`; SHA-256 `224441568f81ffe637b2bd2710d43d6899f14c5913e83b684efe2ba6fca9d029`; validation `validated`.
+
 ## 2026-09-14
 
 - Added `weekly-2026-09-13-r1`; SHA-256 `bdd3ce5111e4768992b9a845d10b8e11e85af60f8434823f0862dba7fe1f282b`; validation `validated_with_warnings`; 1 warning(s).
